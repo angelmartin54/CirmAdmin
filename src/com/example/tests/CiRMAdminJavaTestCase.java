@@ -111,7 +111,8 @@ public class CiRMAdminJavaTestCase {
 	
 	private void sendScreenshot (){
 		failedSRCounter++;
-		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "While checking to see if the SR Questions loaded Q/A test found that SR questions did not load a SR ascreenshot of the case can be found at the link below<br>File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest");
+		String question = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
+		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "While checking if SR Questions loaded Q/A test found that SR questions did not load,<br>A screenshot of the case can be found at the link below<br><br>File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest<br><br>"+ "SR Type in ERROR: " + question);
 		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
 	}
 	
@@ -126,7 +127,7 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private boolean checkSrQuestions() throws Exception {
-		for (int loop = 1; loop <= 10; loop++){
+		for (int loop = 1; loop <= 1; loop++){
 			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a")){
 				selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
 				selenium.click("id=nav-questions");
@@ -163,6 +164,7 @@ public class CiRMAdminJavaTestCase {
 	
 	@Test
 	public void Demo() throws Exception {
+		try{
 		login();
 		
 		boolean goNextPage = false;
@@ -176,7 +178,11 @@ public class CiRMAdminJavaTestCase {
 			}
 			
 		} while (goNextPage);
-		
+		}catch(Exception e) {
+			selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/demoFailure.png");
+			ln(e);
+			ln(e.getMessage());
+		}
 	}
 	
 	
