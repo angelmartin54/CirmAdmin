@@ -14,10 +14,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.omg.CORBA.SystemException;
 import org.openqa.selenium.server.RemoteControlConfiguration;
 
 import com.thoughtworks.selenium.DefaultSelenium;
 import com.thoughtworks.selenium.Selenium;
+import com.thoughtworks.selenium.webdriven.commands.IsTextPresent;
 
 
 @SuppressWarnings("deprecation")
@@ -27,7 +29,8 @@ public class CiRMAdminJavaTestCase {
 	private Selenium selenium;
 	private int failedSRCounter;
 	private int pageNumber;
-	private String site = "https://s0144549.miamidade.gov/html/cirmadmin/app/index.html#/login";
+//	private String site = "http://10.10.32.14/app/index.html";
+	private String site = "https://s0144654.miamidade.gov/html/cirmadmin/app/index.html#/login";
 //	private String site = "https://s0144654/html/cirmadmin/app/index.html#/login";
 	private String loginUserID = "c203036";
 	private String pass = "blah";
@@ -109,15 +112,89 @@ public class CiRMAdminJavaTestCase {
         selenium.start();
         }
 	
+	public void lineCheck(){
+		String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(4) > td:nth-child(3)");
+		ln("here1"+ val);
+		if (val!=null && val.equals("")){
+			ln("It is empty");
+		}
+		else{
+			ln("Not Empty");
+		}
+		
+		ln("made it to vis");
+	}
+	
+	
+	
+	
+	
+	private boolean checkSrDepartment1() throws Exception {
+		for (int loop = 1; loop <= 10; loop++){
+//			Thread.sleep(100);
+			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a")==true)
+				{
+					String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(3)");
+//					ln(val);
+					if (val.equals("")){
+//						ln(val);
+//						sendScreenshot();
+						String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
+						SendEmail.send("angel.martin@miamidade.gov", "HA", "Gracias: "+srType);
+						ln(srType);
+					selenium.click("id=left-nav-sr");
+					gotToPage(pageNumber);}
+				} else {
+					return false;
+			}
+		}		
+		return true;
+	}
+	
+	
+	
+	
+	
+	
+	
+//	private boolean checkSrDepartment() throws Exception {
+//		for (int loop = 1; loop <= 10; loop++)
+//		{	
+//			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(6) > td:nth-child(1) > a"))
+//			{
+//			String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(3)");
+//				if (val!=null || val.equals(""))
+//				{
+//					sendScreenshot();
+//					ln(selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(+loop+) > td:nth-child(1) > a"));
+//				}
+//				gotToPage(pageNumber);
+//		}else{
+//			return false;
+//		}
+//		}
+//		return true;
+//	}
+	
+	
 	private void sendScreenshot (){
 		failedSRCounter++;
-		String question = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
-		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "While checking if SR Questions loaded Q/A test found that SR questions did not load,<br>A screenshot of the case can be found at the link below<br><br>File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest<br><br>"+ "SR Type in ERROR: " + question);
+		String url = selenium.getLocation();
+		String[] array = url.split("/");
+		String array5 = array[5];				
+		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
+		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "While checking if SR Questions loaded Q/A test found that SR questions did not load,<br>A screenshot of the case can be found at the link below<br><br>File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest<br><br>"+ "SR Type in ERROR: " + srType);
 		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
+		ln(srType+","+array5);
+		
 	}
 	
 	private void clickNext(){
+		int i = 0;
+		do{
+		selenium.focus("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
 		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
+		}while(selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a")==false&i<3);
 	}
 	
 	private void gotToPage(int aPageNumber){
@@ -127,21 +204,21 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private boolean checkSrQuestions() throws Exception {
-		for (int loop = 1; loop <= 1; loop++){
-			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a")){
-				selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
-				selenium.click("id=nav-questions");
-				Thread.sleep(5000);
-				if (!selenium.isElementPresent("id=container-0")){
-					sendScreenshot();
-				}
-				selenium.click("id=left-nav-sr");
-				gotToPage(pageNumber);
-			} else {
+		for (int loop = 1; loop <= 10; loop++){
+			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a"))
+				{
+					selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
+					selenium.click("id=nav-questions");
+					Thread.sleep(5000);
+					if (!selenium.isElementPresent("id=container-0")){
+						sendScreenshot();
+					}
+					selenium.click("id=left-nav-sr");
+					gotToPage(pageNumber);
+				} else {
 				return false;
 			}
 		}		
-		
 		return true;
 	}
 	
@@ -149,21 +226,24 @@ public class CiRMAdminJavaTestCase {
 	@Test
 	public void login() throws Exception {
 		try{
+			int i = 0;	
+		do{
 			selenium.open(site);
 			selenium.type("css=#user", loginUserID);
 			selenium.type("css=#password", pass);
 			selenium.click("id=login-button");
-			Thread.sleep(8000);
-			selenium.isTextPresent("Service Request");
+			Thread.sleep(4000);
+			i++;
+			System.out.println(i);
+			ln(selenium.isTextPresent("Service Request"));
+		} while (selenium.isTextPresent("Service Request")==false & i < 3);
 		}catch (Exception e){
-            System.out.println(e);
-            SendEmail.send("angel.martin@miamidade.gov", "test", "**login test has failed**<br><br>Screen shot on failure can be found at File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png<br><br><br>To manually test this follow the steps below<br>* Open Chorme and navigate to the CiRM application<br>* Fill in the User and Password boxes<br>* Then click the Login button and wait 8-10 seconds for the application to load if the page loads the test has passed<br><br>"+e.getMessage());
-            selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-            Assert.fail();}
+				Assert.fail();}
 		}
 	
-	@Test
-	public void Demo() throws Exception {
+	
+		@Test
+		public void Demo() throws Exception {
 		try{
 		login();
 		
@@ -182,212 +262,28 @@ public class CiRMAdminJavaTestCase {
 			selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/demoFailure.png");
 			ln(e);
 			ln(e.getMessage());
+			SendEmail.send("angel.martin@miamidade.gov,chirino@miamidade.gov", "SR Questions Test Failed", "Check test failed");
+		}}
+		
+				
+		@Test
+		public void srDepartment() throws Exception {
+			login();
+			boolean goNextPage = false;
+			
+			do{
+				goNextPage = checkSrDepartment1();
+				
+				if (goNextPage) {
+					pageNumber++;
+					clickNext();
+				}
+				
+			} while (goNextPage);
+			
 		}
-	}
 	
-	
-	
-	@Test
-	public void SRQuestions() throws Exception {
-		login();
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(1) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_1.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(2) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(3) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(4) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(5) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(6) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(7) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-//		2008 Structure Registration
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-        selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(8) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-//		2008 Vacant Lot Registration
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "test", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");}
-          		
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(9) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(10) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-//		click next page
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(1) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_1.png");
-			 }
-		selenium.click("id=left-nav-sr");
-//		click next page
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(2) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(3) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(4) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(5) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(6) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(7) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(8) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(9) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(10) > td:nth-child(1) > a");
-		selenium.click("id=nav-questions");
-		Thread.sleep(5000);
-		if ((selenium.isElementPresent("id=container-0"))) {} //Do smthn
-		else {
-          		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "test");
-				selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/Login.png");
-			 }
-		selenium.click("id=left-nav-sr");
-	}
-	
-	
-	
+			
 	@Test
 	public void enabledCheck() throws Exception {
 		try{
@@ -410,6 +306,5 @@ public class CiRMAdminJavaTestCase {
 //	 selenium.stop();
 //	 selenium.shutDownSeleniumServer();
 //	 ln("server successfully shut down.");
-	
-	}
+	 }
 }
