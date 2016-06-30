@@ -24,8 +24,6 @@ import com.thoughtworks.selenium.webdriven.commands.IsTextPresent;
 
 @SuppressWarnings("deprecation")
 public class CiRMAdminJavaTestCase {
-	//Variables for Post deploymnet tests
-	//can be used across methods.
 	private Selenium selenium;
 	private int failedSRCounter;
 	private int pageNumber;
@@ -39,9 +37,9 @@ public class CiRMAdminJavaTestCase {
 	private void ln (Object test){
 		System.out.println(test);
 	}
+	Object empty = new Object();
 		
-	//private String longPwd = "password";
-	//private String pageLoadTime= "50000";
+	
 	public class SimpleOnFailed extends TestWatcher {
 	    @Override
 	    protected void failed(Throwable e, Description description) {
@@ -51,8 +49,7 @@ public class CiRMAdminJavaTestCase {
 
 	
 	
-	//private String longPwd = "password";
-	//private String pageLoadTime= "50000";
+
 	
 	
 	public static boolean isMyServerUp(){
@@ -88,8 +85,6 @@ public class CiRMAdminJavaTestCase {
 	
 	@Before
 	public void startServer () throws Exception {
-//		SendEmail.send("rajiv@miamidade.gov","test is starting", "test is starting");
-		
 		failedSRCounter = 0;
 		pageNumber = 1;
 		
@@ -123,59 +118,25 @@ public class CiRMAdminJavaTestCase {
 		}
 		
 		ln("made it to vis");
-	}
+	}	
 	
-	
-	
-	
-	
-	private boolean checkSrDepartment1() throws Exception {
+	private boolean checkSrDepartment() throws Exception {
 		for (int loop = 1; loop <= 10; loop++){
-//			Thread.sleep(100);
+			Thread.sleep(250);
 			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a")==true)
 				{
 					String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(3)");
-//					ln(val);
-					if (val.equals("")){
-//						ln(val);
-//						sendScreenshot();
+					if ((val==null==true) || (val.equals("")==true)){
 						String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
-						SendEmail.send("angel.martin@miamidade.gov", "HA", "Gracias: "+srType);
+						SendEmail.send("angel.martin@miamidade.gov", "Sr Department Check", "The following service request did not retun a department: "+srType);
 						ln(srType);
-					selenium.click("id=left-nav-sr");
-					gotToPage(pageNumber);}
+						}
 				} else {
 					return false;
 			}
 		}		
 		return true;
 	}
-	
-	
-	
-	
-	
-	
-	
-//	private boolean checkSrDepartment() throws Exception {
-//		for (int loop = 1; loop <= 10; loop++)
-//		{	
-//			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(6) > td:nth-child(1) > a"))
-//			{
-//			String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(3)");
-//				if (val!=null || val.equals(""))
-//				{
-//					sendScreenshot();
-//					ln(selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(+loop+) > td:nth-child(1) > a"));
-//				}
-//				gotToPage(pageNumber);
-//		}else{
-//			return false;
-//		}
-//		}
-//		return true;
-//	}
-	
 	
 	private void sendScreenshot (){
 		failedSRCounter++;
@@ -223,27 +184,27 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	
-	@Test
-	public void login() throws Exception {
-		try{
-			int i = 0;	
-		do{
-			selenium.open(site);
-			selenium.type("css=#user", loginUserID);
-			selenium.type("css=#password", pass);
-			selenium.click("id=login-button");
-			Thread.sleep(4000);
-			i++;
-			System.out.println(i);
-			ln(selenium.isTextPresent("Service Request"));
-		} while (selenium.isTextPresent("Service Request")==false & i < 3);
-		}catch (Exception e){
-				Assert.fail();}
-		}
+		@Test
+		public void login() throws Exception {
+			try{
+				int i = 0;	
+			do{
+				selenium.open(site);
+				selenium.type("css=#user", loginUserID);
+				selenium.type("css=#password", pass);
+				selenium.click("id=login-button");
+				Thread.sleep(4000);
+				i++;
+				System.out.println(i);
+				ln(selenium.isTextPresent("Service Request"));
+			} while (selenium.isTextPresent("Service Request")==false & i < 3);
+			}catch (Exception e){
+					Assert.fail();}
+			}
 	
 	
 		@Test
-		public void Demo() throws Exception {
+		public void srQuestions() throws Exception {
 		try{
 		login();
 		
@@ -272,7 +233,7 @@ public class CiRMAdminJavaTestCase {
 			boolean goNextPage = false;
 			
 			do{
-				goNextPage = checkSrDepartment1();
+				goNextPage = checkSrDepartment();
 				
 				if (goNextPage) {
 					pageNumber++;
@@ -284,20 +245,20 @@ public class CiRMAdminJavaTestCase {
 		}
 	
 			
-	@Test
-	public void enabledCheck() throws Exception {
-		try{
-			login();
-			selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div:nth-child(2) > div:nth-child(5) > div > div > label:nth-child(2)");
-			selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > div > button:nth-child(4) > span");
-			Thread.sleep(500);
-			selenium.isTextPresent("Disable");
-			selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body");
-//			selenium.isVisible("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(1) > td:nth-child(5) > button");
-		}catch (Exception e){
-			
+		@Test
+		public void enabledCheck() throws Exception {
+			try{
+				login();
+				selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div:nth-child(2) > div:nth-child(5) > div > div > label:nth-child(2)");
+				selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > div > button:nth-child(4) > span");
+				Thread.sleep(500);
+				selenium.isTextPresent("Disable");
+				selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body");
+	//			selenium.isVisible("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(1) > td:nth-child(5) > button");
+			}catch (Exception e){
+				
+			}
 		}
-	}
 	
 	
 	
