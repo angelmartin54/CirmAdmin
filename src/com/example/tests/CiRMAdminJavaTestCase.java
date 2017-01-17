@@ -28,7 +28,8 @@ public class CiRMAdminJavaTestCase {
 	private int failedSRCounter;
 	private int pageNumber;
 //	private String site = "http://10.10.32.14/app/index.html";
-	private String site = "https://s0144654.miamidade.gov/html/cirmadmin/app/index.html#/login";
+//	private String site = "https://s0144654.miamidade.gov/html/cirmadmin/app/index.html#/login";
+	private String site = "https://cirmadmin-test.miamidade.gov/html/cirmadmin/app/index.html#/login";
 //	private String site = "https://s0144654/html/cirmadmin/app/index.html#/login";
 	private String loginUserID = "c203036";
 	private String pass = "blah";
@@ -108,6 +109,7 @@ public class CiRMAdminJavaTestCase {
         }
 	
 	public void lineCheck(){
+		ln("inside linecheck");
 		String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child(4) > td:nth-child(3)");
 		ln("here1"+ val);
 		if (val!=null && val.equals("")){
@@ -121,13 +123,14 @@ public class CiRMAdminJavaTestCase {
 	}	
 	
 	private boolean checkSrDepartment() throws Exception {
+	ln("insidecheckdepartment");
 		for (int loop = 1; loop <= 10; loop++){
 			Thread.sleep(250);
-			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a")==true)
+			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a")==true)
 				{
-					String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(3)");
+					String val = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(4)");
 					if ((val==null==true) || (val.equals("")==true)){
-						String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
+						String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a");
 						SendEmail.send("angel.martin@miamidade.gov", "Sr Department Check", "The following service request did not retun a department: "+srType);
 						ln(srType);
 						}
@@ -139,18 +142,20 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private void sendScreenshot (){
+//		ln("insidescreenshot");
 		failedSRCounter++;
 		String url = selenium.getLocation();
 		String[] array = url.split("/");
-		String array5 = array[5];				
+		String array7 = array[7];				
 		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
 		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "While checking if SR Questions loaded Q/A test found that SR questions did not load,<br>A screenshot of the case can be found at the link below<br><br>File:///C://Users/angel.martin.MIAMIDADE/Desktop/failedtest<br><br>"+ "SR Type in ERROR: " + srType);
 		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
-		ln(srType+","+array5);
+		ln(srType+","+array7);
 		
 	}
 	
 	private void clickNext(){
+//		ln("insideclicknext");
 		int i = 0;
 		do{
 		selenium.focus("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
@@ -159,6 +164,7 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private void gotToPage(int aPageNumber){
+//		ln("insidegotopage");
 		for (int i=1; i<aPageNumber; i++){
 			clickNext();
 		}
@@ -166,18 +172,18 @@ public class CiRMAdminJavaTestCase {
 	
 	private boolean checkSrQuestions() throws Exception {
 		for (int loop = 1; loop <= 10; loop++){
-			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a"))
+			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a"))
 				{
-					selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(1) > a");
+					selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a");
 					selenium.click("id=nav-questions");
 					Thread.sleep(5000);
-					if (!selenium.isElementPresent("id=container-0")){
+					if (!selenium.isElementPresent("css=#expListLi")){
 						sendScreenshot();
 					}
 					selenium.click("id=left-nav-sr");
 					gotToPage(pageNumber);
 				} else {
-				return false;
+				return false; 
 			}
 		}		
 		return true;
@@ -203,29 +209,30 @@ public class CiRMAdminJavaTestCase {
 			}
 	
 	
-		@Test
-		public void srQuestions() throws Exception {
-		try{
-		login();
-		
-		boolean goNextPage = false;
-		
-		do{
-			goNextPage = checkSrQuestions();
-			
-			if (goNextPage) {
-				pageNumber++;
-				clickNext();
-			}
-			
-		} while (goNextPage);
-		}catch(Exception e) {
+	@Test
+	public void srQuestions() throws Exception {
+		try {
+			login();
+
+			boolean goNextPage = false;
+
+			do {
+				goNextPage = checkSrQuestions();
+
+				if (goNextPage) {
+					pageNumber++;
+					clickNext();
+				}
+
+			} while (goNextPage);
+		} catch (Exception e) {
 			selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/demoFailure.png");
 			ln(e);
 			ln(e.getMessage());
-			SendEmail.send("angel.martin@miamidade.gov,chirino@miamidade.gov", "SR Questions Test Failed", "Check test failed");
-		}}
-		
+			SendEmail.send("angel.martin@miamidade.gov,chirino@miamidade.gov", "SR Questions Test Failed",
+					"Check test failed");
+		}
+	}
 				
 		@Test
 		public void srDepartment() throws Exception {
