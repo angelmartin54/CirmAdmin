@@ -28,6 +28,7 @@ public class CiRMAdminJavaTestCase {
 	private int failedSRCounter;
 	private int pageNumber;
 //	private String site = "http://10.10.32.14/app/index.html";
+//	private String site = "http://10.10.32.145/cirm-admin-ui/app/index.html#/";
 //	private String site = "https://s0144654.miamidade.gov/html/cirmadmin/app/index.html#/login";
 	private String site = "https://cirmadmin-test.miamidade.gov/html/cirmadmin/app/index.html#/login";
 //	private String site = "https://s0144654/html/cirmadmin/app/index.html#/login";
@@ -39,7 +40,7 @@ public class CiRMAdminJavaTestCase {
 		System.out.println(test);
 	}
 	Object empty = new Object();
-		
+	int ok = 0;	
 	
 	public class SimpleOnFailed extends TestWatcher {
 	    @Override
@@ -142,17 +143,31 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private void sendScreenshot (){
-//		ln("insidescreenshot");
 		failedSRCounter++;
-//		String url = selenium.getLocation();
-//		String[] array = url.split("/");
-//		String array7 = array[7];				
-//		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
-		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "activity test ");
-		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
-//		ln(srType+","+array7);
+		String url = selenium.getLocation();
+		String[] array = url.split("/");
+		String array6 = array[6];				
+		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
+//		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "activity test ");
+//		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
+		ln(srType+","+array6);
 		
 	}
+	
+	
+	
+	private void actScreenshot (){
+		failedSRCounter++;
+		String url = selenium.getLocation();
+		String[] array = url.split("/");
+		String array7 = array[8];				
+//		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
+//		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "activity test ");
+//		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
+		ln(array7);
+		
+	}
+	
 	
 	
 	
@@ -185,7 +200,7 @@ public class CiRMAdminJavaTestCase {
 			clickNext();
 		}
 	}
-
+	
 	private boolean checkactivity() throws Exception {
 		for (int loop = 1; loop <= 10; loop++) {
 			if (selenium.isElementPresent(
@@ -194,18 +209,16 @@ public class CiRMAdminJavaTestCase {
 				selenium.click(
 						"css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div > div > table > tbody > tr:nth-child("
 								+ loop + ") > td.first-column.ng-binding");
-				Thread.sleep(9000);
+				Thread.sleep(2000);
 				if (selenium.isTextPresent("Cannot load this Activity")) {
-					sendScreenshot();
-					if (selenium.isElementPresent(
-							"css=#ngdialog1 > div.ngdialog-content.ng-binding > div.ngdialog-buttons > button") == true) {
-						selenium.click(
-								"css=#ngdialog1 > div.ngdialog-content.ng-binding > div.ngdialog-buttons > button");
-					} else {
-						selenium.click(
-								"css=#ngdialog2 > div.ngdialog-content.ng-binding > div.ngdialog-buttons > button");
-					}
+					actScreenshot();
+					
+					if (selenium.isTextPresent("Cannot load this Activity")==true) {
 
+						selenium.click("id=genOk");
+					
+					}
+ 
 				}
 				selenium.click("id=left-nav-activities");
 				actgotToPage(pageNumber);
@@ -318,6 +331,8 @@ public class CiRMAdminJavaTestCase {
 			public void activityCheck() throws Exception {
 				try {
 					login();
+//					selenium.open(site);
+//					Thread.sleep(5000);
 					selenium.click("id=left-nav-activities");
 					Thread.sleep(9000);
 					boolean actgotToPage = false;
