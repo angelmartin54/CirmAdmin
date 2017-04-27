@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.omg.CORBA.SystemException;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.server.RemoteControlConfiguration;
 
 import com.thoughtworks.selenium.DefaultSelenium;
@@ -30,7 +32,8 @@ public class CiRMAdminJavaTestCase {
 //	private String site = "http://10.10.32.14/app/index.html";
 //	private String site = "http://10.10.32.145/cirm-admin-ui/app/index.html#/";
 //	private String site = "https://s0144654.miamidade.gov/html/cirmadmin/app/index.html#/login";
-	private String site = "https://cirmadmin-test.miamidade.gov/html/cirmadmin/app/index.html#/login";
+	private String site = "https://cirmadmin-test.miamidade.gov/html/cirmadmin/app/index.html#!/login";
+//	private String site = "http://10.10.32.145/cirm-admin-ui/app/index.html#!/login";
 //	private String site = "https://s0144654/html/cirmadmin/app/index.html#/login";
 	private String loginUserID = "c203036";
 	private String pass = "blah";
@@ -146,12 +149,21 @@ public class CiRMAdminJavaTestCase {
 		failedSRCounter++;
 		String url = selenium.getLocation();
 		String[] array = url.split("/");
-		String array6 = array[6];				
-		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
+		String array7 = array[7];				
+		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div.panel.panel-default.search.no-shadow.ng-scope > div.custom-header-container > div > div:nth-child(1) > div.custom-header > h3");
 //		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "activity test ");
-//		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
-		ln(srType+","+array6);
+		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/Failedtest/SR_ques_"+failedSRCounter+".png");
+		ln(srType+","+array7);
 		
+		int i = 0;
+		do {
+			i++;
+		} while (selenium.isElementPresent("css=#ngdialog" + i + " > div.ngdialog-content.ng-binding > div") == false
+				& i <= 200);
+
+		if (i < 200)
+			selenium.click("css=#ngdialog" + i + " > div.ngdialog-content.ng-binding > div");
+
 	}
 	
 	
@@ -160,7 +172,7 @@ public class CiRMAdminJavaTestCase {
 		failedSRCounter++;
 		String url = selenium.getLocation();
 		String[] array = url.split("/");
-		String array7 = array[8];				
+		String array7 = array[6];				
 //		String srType = selenium.getText("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-heading > h3");
 //		SendEmail.send("angel.martin@miamidade.gov", "CiRM-Admin-Test-FAILED", "activity test ");
 //		selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/SR_ques_"+failedSRCounter+".png");
@@ -182,11 +194,20 @@ public class CiRMAdminJavaTestCase {
 	
 	
 	private void clickNext(){
+//		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
 		int i = 0;
 		do{
+		i++;
+		try {
+			Thread.sleep(150);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		}while(selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a")==false&i<3);
 		selenium.focus("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
 		selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a");
-		}while(selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > div > div > div > ul > li:nth-child(11) > a")==false&i<3);
+		
 	}
 	
 	private void actgotToPage(int aPageNumber){
@@ -230,21 +251,36 @@ public class CiRMAdminJavaTestCase {
 	}
 	
 	private boolean checkSrQuestions() throws Exception {
-		for (int loop = 1; loop <= 10; loop++){
-			if (selenium.isElementPresent("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a"))
-				{
-					selenium.click("css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("+loop+") > td:nth-child(2) > a");
-					selenium.click("id=nav-questions");
+		for (int loop = 1; loop <= 10; loop++) {
+			if (selenium.isElementPresent(
+					"css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("
+							+ loop + ") > td:nth-child(2) > a")) {
+				selenium.click(
+						"css=#main-wrapper > ui-view > section > section > div > div > ui-view > div > div.panel-body > div.form-inline > div > table > tbody > tr:nth-child("
+								+ loop + ") > td:nth-child(2) > a");
+				Thread.sleep(100);
+				selenium.click("id=nav-questions");
+				int i = 0;
+				do {
 					Thread.sleep(9000);
-					if (!selenium.isElementPresent("css=#expListLi")){
-						sendScreenshot();
-					}
-					selenium.click("id=left-nav-sr");
-					gotToPage(pageNumber);
-				} else {
-				return false; 
+					i++;
+				} while (!selenium.isElementPresent("css=#expListLi") & i < 3);
+				if (!selenium.isElementPresent("css=#expListLi")) {
+					sendScreenshot();
+				}
+				int c = 0;
+				do {
+					c++;
+					Thread.sleep(100);
+				} while (selenium.isElementPresent("id=left-nav-sr") == false & c <= 3);
+
+				selenium.click("id=left-nav-sr");
+				Thread.sleep(100);
+				gotToPage(pageNumber);
+			} else {
+				return false;
 			}
-		}		
+		}
 		return true;
 	}
 	
@@ -255,6 +291,9 @@ public class CiRMAdminJavaTestCase {
 			try{
 				int i = 0;	
 			do{
+				do{
+					selenium.refresh();
+				}while(i>=2);
 				selenium.open(site);
 				selenium.type("css=#user", loginUserID);
 				selenium.type("css=#password", pass);
@@ -265,6 +304,7 @@ public class CiRMAdminJavaTestCase {
 				ln(selenium.isTextPresent("Service Request"));
 			} while (selenium.isTextPresent("Service Request")==false & i < 3);
 			}catch (Exception e){
+					ln(e.getMessage());
 					Assert.fail();}
 			}
 	
@@ -273,7 +313,8 @@ public class CiRMAdminJavaTestCase {
 	public void srQuestions() throws Exception {
 		try {
 			login();
-
+//			selenium.open(site);
+			Thread.sleep(100);
 			boolean goNextPage = false;
 
 			do {
@@ -281,6 +322,7 @@ public class CiRMAdminJavaTestCase {
 
 				if (goNextPage) {
 					pageNumber++;
+					Thread.sleep(100);
 					clickNext();
 				}
 
@@ -289,8 +331,8 @@ public class CiRMAdminJavaTestCase {
 			selenium.captureScreenshot("C://Users/angel.martin.MIAMIDADE/Desktop/failedtest/demoFailure.png");
 			ln(e);
 			ln(e.getMessage());
-			SendEmail.send("angel.martin@miamidade.gov,chirino@miamidade.gov", "SR Questions Test Failed",
-					"Check test failed");
+//			SendEmail.send("angel.martin@miamidade.gov,chirino@miamidade.gov", "SR Questions Test Failed",
+//					"Check test failed");
 		}
 	}
 				
